@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lucas · Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a datasheet for a person. Sections are addressed like registers (0x00…), skills read like a spec table, the project is the headline part. */
+:root {
+  --bg: #f3f4f1;
+  --surface: #ffffff;
+  --ink: #15171c;
+  --muted: #5b606b;
+  --line: #d9dbd6;
+  --accent: #2346d9;
+  --accent-ink: #ffffff;
+  --signal: #f2a516;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101217; --surface: #181b22; --ink: #eceef2; --muted: #9aa0ad;
+    --line: #2a2e38; --accent: #7d95ff; --accent-ink: #0d1020; --signal: #f5b53a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101217; --surface: #181b22; --ink: #eceef2; --muted: #9aa0ad;
+  --line: #2a2e38; --accent: #7d95ff; --accent-ink: #0d1020; --signal: #f5b53a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 17px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, .btn:focus-visible { outline: 3px solid var(--signal); outline-offset: 3px; border-radius: 6px; }
+img { max-width: 100%; display: block; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.1; }
+
+.wrap { width: min(1080px, 100% - 40px); margin-inline: auto; }
+
+/* Top bar */
+.top { border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-block: 16px; flex-wrap: wrap; }
+.mark { font-family: var(--mono); font-size: 14px; color: var(--ink); text-decoration: none; font-weight: 500; }
+.mark span { color: var(--accent); }
+.nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.nav a { font-family: var(--mono); font-size: 13px; color: var(--muted); text-decoration: none; }
+.nav a:hover { color: var(--ink); }
+
+/* Hero */
+.hero { padding-block: 72px 56px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 48px; align-items: end; }
+.status { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 13px; color: var(--muted); border: 1px solid var(--line); background: var(--surface); padding: 6px 12px; border-radius: 999px; margin-bottom: 24px; }
+.status i { width: 8px; height: 8px; border-radius: 50%; background: var(--signal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 25%, transparent); }
+.hero h1 { font-size: clamp(56px, 10vw, 112px); font-weight: 800; letter-spacing: -0.03em; }
+.hero h1 + p { font-family: var(--display); font-size: clamp(22px, 3vw, 30px); font-weight: 500; line-height: 1.25; margin: 16px 0 0; max-width: 22ch; }
+.lede { color: var(--muted); max-width: 46ch; margin: 0 0 24px; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn { display: inline-block; font-weight: 600; font-size: 15px; padding: 12px 20px; border-radius: 10px; text-decoration: none; border: 1.5px solid var(--ink); color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn:hover { transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) { .btn:hover { transform: none; } }
+
+/* Spec strip */
+.spec { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--line); }
+.spec div { padding: 18px 20px; border-left: 1px solid var(--line); }
+.spec div:first-child { border-left: 0; padding-left: 0; }
+.spec dt { font-family: var(--mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.spec dd { margin: 4px 0 0; font-weight: 600; }
+
+/* Sections */
+section { padding-block: 72px; }
+.sec-head { display: grid; grid-template-columns: 140px 1fr; gap: 24px; align-items: baseline; margin-bottom: 36px; }
+.addr { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+.sec-head h2 { font-size: clamp(30px, 4vw, 42px); font-weight: 700; letter-spacing: -0.02em; }
+.body-col { margin-left: 164px; }
+.prose { max-width: 62ch; }
+.prose p { margin: 0 0 16px; }
+
+/* Skills table */
+.skills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.skill { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+.skill h3 { font-size: 20px; font-weight: 700; }
+.skill p { margin: 0; color: var(--muted); font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.chip { font-family: var(--mono); font-size: 13px; padding: 4px 10px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 10%, transparent); color: var(--ink); border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent); }
+
+/* Project */
+.project { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.project figure { margin: 0; position: relative; border-bottom: 1px solid var(--line); }
+.project figcaption { position: absolute; left: 16px; bottom: 16px; font-family: var(--mono); font-size: 12px; background: rgba(12,14,20,.78); color: #fff; padding: 5px 10px; border-radius: 6px; }
+.project-body { display: grid; grid-template-columns: 1.1fr 1fr; gap: 40px; padding: 32px; }
+.tag { font-family: var(--mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.project h3 { font-size: clamp(26px, 3.4vw, 34px); font-weight: 700; margin: 8px 0 14px; letter-spacing: -0.01em; }
+.project-body p { margin: 0 0 16px; }
+.features { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.features li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.features b { font-weight: 600; }
+.features .n { font-family: var(--mono); font-size: 12px; color: var(--accent); padding-top: 3px; }
+.stats { display: flex; gap: 28px; flex-wrap: wrap; margin: 20px 0 0; }
+.stats div dt { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.stats div dd { margin: 0; font-family: var(--display); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+#projects .wrap > .project + .project { margin-top: 28px; }
+.pipeline { padding: 28px 32px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); display: grid; grid-template-columns: 1.3fr 1fr; gap: 28px 40px; align-items: start; }
+.pipe-head { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.pipeline ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.pipeline li { display: grid; grid-template-columns: 76px 1fr; gap: 12px; padding: 10px 0; border-left: 2px solid var(--accent); padding-left: 16px; font-size: 15px; position: relative; }
+.pipeline li::before { content: ""; position: absolute; left: -6px; top: 17px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
+.pk { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--accent); padding-top: 3px; }
+.metrics { width: 100%; border-collapse: collapse; font-size: 15px; font-variant-numeric: tabular-nums; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.metrics caption { text-align: left; font-family: var(--mono); font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding-bottom: 8px; }
+.metrics th, .metrics td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--line); }
+.metrics th:first-child { text-align: left; }
+.metrics thead th { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--muted); }
+.metrics tbody tr:last-child > * { border-bottom: 0; font-weight: 600; }
+@media (max-width: 900px) { .pipeline { grid-template-columns: 1fr; padding: 24px; } }
+@media (max-width: 480px) { .pipeline li { grid-template-columns: 1fr; gap: 2px; } }
+
+/* Approach */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 2px solid var(--ink); }
+.steps li { list-style: none; padding: 18px 20px 0 0; }
+.steps .k { font-family: var(--mono); font-size: 12px; color: var(--accent); }
+.steps h3 { font-size: 19px; margin: 6px 0 6px; }
+.steps p { margin: 0; color: var(--muted); font-size: 15px; }
+.steps ol, ol.steps { padding: 0; margin: 0; }
+
+/* Contact */
+.contact { background: var(--ink); color: var(--bg); border-radius: 18px; padding: 44px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px; align-items: center; }
+.contact h2 { font-size: clamp(30px, 4vw, 44px); letter-spacing: -0.02em; }
+.contact p { color: color-mix(in srgb, var(--bg) 70%, transparent); margin: 12px 0 0; max-width: 40ch; }
+.links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.links li { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid color-mix(in srgb, var(--bg) 18%, transparent); }
+.links .k { font-family: var(--mono); font-size: 13px; color: color-mix(in srgb, var(--bg) 60%, transparent); }
+.links .v { font-weight: 500; word-break: break-word; }
+.todo { color: var(--signal); font-family: var(--mono); font-size: 14px; }
+
+footer { padding-block: 32px 48px; color: var(--muted); font-family: var(--mono); font-size: 13px; }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: 1fr; gap: 28px; padding-top: 48px; }
+  .skills { grid-template-columns: 1fr; }
+  .project-body { grid-template-columns: 1fr; padding: 24px; gap: 24px; }
+  .steps { grid-template-columns: 1fr 1fr; row-gap: 24px; }
+  .contact { grid-template-columns: 1fr; padding: 28px; }
+  .body-col { margin-left: 0; }
+  .sec-head { grid-template-columns: 1fr; gap: 6px; }
+  .spec { grid-template-columns: 1fr 1fr; }
+  .spec div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .spec div:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+@media (max-width: 480px) {
+  section { padding-block: 52px; }
+  .steps { grid-template-columns: 1fr; }
+  .spec { grid-template-columns: 1fr; }
+  .spec div { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); }
+  .spec div:first-child { border-top: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#top">lucas<span>.dev</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap">
+    <div class="hero">
+      <div>
+        <div class="status"><i></i>Open to internships</div>
+        <h1>Lucas</h1>
+        <p>Computer Engineering student who builds games, apps and machine-learning models.</p>
+      </div>
+      <div>
+        <p class="lede">Year 2 at Singapore Polytechnic. I write Python and C++, analyse data with KNIME, Power BI and Excel, and use AI tools to take ideas from a sketch to something people can actually use.</p>
+        <div class="actions">
+          <a class="btn primary" href="#projects">See my work</a>
+          <a class="btn" href="#contact">Get in touch</a>
+        </div>
+      </div>
+    </div>
+
+    <dl class="spec">
+      <div><dt>Course</dt><dd>Diploma in Computer Engineering</dd></div>
+      <div><dt>School</dt><dd>Singapore Polytechnic</dd></div>
+      <div><dt>Year</dt><dd>Year 2</dd></div>
+      <div><dt>Location</dt><dd>Singapore</dd></div>
+    </dl>
+  </div>
+
+  <section id="about">
+    <div class="wrap">
+      <div class="sec-head"><span class="addr">0x00 · About</span><h2>I like turning an idea into a working build.</h2></div>
+      <div class="body-col prose">
+        <p>I'm a second-year Computer Engineering student looking for an internship where I can work on real software, data or product problems. In school I've worked with Python and C++, and with data tools like KNIME, Power BI and Excel to clean data, find patterns and present them clearly.</p>
+        <p>Outside class I build games and apps. I use AI as a coding partner to move faster, then test, debug and adjust the design until it plays the way I want. Recent projects include a machine-learning model that predicts HDB resale prices and a cat-collecting tycoon game on Roblox.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="sec-head"><span class="addr">0x01 · Skills</span><h2>What I work with</h2></div>
+      <div class="skills">
+        <article class="skill">
+          <h3>Programming</h3>
+          <p>Writing logic, solving problems and building small programs in school and personal projects.</p>
+          <div class="chips"><span class="chip">Python</span><span class="chip">C++</span><span class="chip">pandas</span><span class="chip">NumPy</span><span class="chip">Jupyter</span></div>
+        </article>
+        <article class="skill">
+          <h3>Data analytics</h3>
+          <p>Cleaning and transforming data, training prediction models and turning numbers into charts and dashboards.</p>
+          <div class="chips"><span class="chip">scikit-learn</span><span class="chip">KNIME</span><span class="chip">Power BI</span><span class="chip">Excel</span><span class="chip">Matplotlib</span></div>
+        </article>
+        <article class="skill">
+          <h3>Games &amp; apps</h3>
+          <p>Designing game systems and app features, and using AI tools to prototype and iterate quickly.</p>
+          <div class="chips"><span class="chip">Roblox Studio</span><span class="chip">AI-assisted dev</span><span class="chip">UI design</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="wrap">
+      <div class="sec-head"><span class="addr">0x02 · Projects</span><h2>Things I've built</h2></div>
+      <article class="project">
+        <figure>
+          <img src="roblox-cat-game.jpg" alt="In-game screenshot of the cat tycoon: a kitchen with roaming cats, a coin counter showing 72 coins at +11 per second, 8 of 12 cats, Adopt a Cat, Upgrades and My Cats buttons, a locked Bedroom door reading Buy Bigger House, and a leaderboard." width="1341" height="791">
+          <figcaption>Playtest in Roblox Studio</figcaption>
+        </figure>
+        <div class="project-body">
+          <div>
+            <span class="tag">Roblox game · Game design · AI-assisted</span>
+            <h3>Cat Adoption Tycoon</h3>
+            <p>An idle tycoon game where players adopt cats, earn coins from them every second, and spend those coins on upgrades and a bigger house to fit more cats.</p>
+            <p>I designed the game loop, the in-game shop and menus, and the house layout, and built it in Roblox Studio with AI helping me write and debug the scripts.</p>
+            <dl class="stats">
+              <div><dt>Income model</dt><dd>coins / sec</dd></div>
+              <div><dt>Cat capacity</dt><dd>12 per house</dd></div>
+              <div><dt>Live board</dt><dd>cats + coins</dd></div>
+            </dl>
+          </div>
+          <ul class="features">
+            <li><span class="n">01</span><span><b>Adopt a Cat.</b> Spend coins to adopt a new cat, which then walks around the house.</span></li>
+            <li><span class="n">02</span><span><b>Passive income.</b> Every cat adds to the coins-per-second rate shown live on screen.</span></li>
+            <li><span class="n">03</span><span><b>Upgrades shop.</b> Boost earnings and progress faster.</span></li>
+            <li><span class="n">04</span><span><b>My Cats collection.</b> View and manage cats, with a capacity limit per house.</span></li>
+            <li><span class="n">05</span><span><b>Unlockable rooms.</b> New rooms like the Bedroom open when you buy a bigger house.</span></li>
+            <li><span class="n">06</span><span><b>Leaderboard.</b> Shows each player's cat count and coins in real time.</span></li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="project hdb">
+        <div class="pipeline" aria-label="Model pipeline">
+          <div class="pipe-head"><span>resale_price_model.ipynb</span><span>234,672 rows · 55 features</span></div>
+          <ol>
+            <li><span class="pk">LOAD</span><span>HDB resale transactions, 2017 onward</span></li>
+            <li><span class="pk">CLEAN</span><span>"61 years 04 months" → 61.33 yrs · "10 TO 12" → storey 11</span></li>
+            <li><span class="pk">SPLIT</span><span>70% train · 15% validation · 15% test</span></li>
+            <li><span class="pk">ENCODE</span><span>One-hot town, flat type, flat model; scale numbers. Fit on train only, so no data leakage</span></li>
+            <li><span class="pk">TRAIN</span><span>Linear Regression baseline → Random Forest tuned with RandomizedSearchCV</span></li>
+            <li><span class="pk">PREDICT</span><span>Price estimate, likely range and comparable past sales</span></li>
+          </ol>
+          <table class="metrics">
+            <caption>Linear Regression baseline</caption>
+            <thead><tr><th scope="col">Set</th><th scope="col">R²</th><th scope="col">MAE</th><th scope="col">RMSE</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Train</th><td>0.867</td><td>$53,124</td><td>$69,482</td></tr>
+              <tr><th scope="row">Validation</th><td>0.867</td><td>$53,069</td><td>$69,829</td></tr>
+              <tr><th scope="row">Test</th><td>0.867</td><td>$52,940</td><td>$69,444</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="project-body">
+          <div>
+            <span class="tag">Machine learning · Python · scikit-learn</span>
+            <h3>HDB Resale Price Predictor</h3>
+            <p>A model that estimates the resale price of a Singapore HDB flat from its town, flat type and model, floor area, storey, remaining lease and year of sale. I trained it on over 234,000 real resale transactions.</p>
+            <p>I built the full data pipeline: parsing lease and storey text into numbers, splitting before encoding and scaling to avoid data leakage, then comparing a linear baseline against a tuned Random Forest.</p>
+            <dl class="stats">
+              <div><dt>Transactions</dt><dd>234,672</dd></div>
+              <div><dt>Baseline test R²</dt><dd>0.867</dd></div>
+              <div><dt>Models</dt><dd>LR + RF</dd></div>
+            </dl>
+          </div>
+          <ul class="features">
+            <li><span class="n">01</span><span><b>Interactive predictor.</b> Answer step-by-step prompts and get an estimated price.</span></li>
+            <li><span class="n">02</span><span><b>Likely price range.</b> Uses the spread across the Random Forest's trees to show uncertainty.</span></li>
+            <li><span class="n">03</span><span><b>Comparable sales.</b> Lists recent transactions in the same town with similar size.</span></li>
+            <li><span class="n">04</span><span><b>Budget filter.</b> Finds past units in a chosen town that fit your budget.</span></li>
+            <li><span class="n">05</span><span><b>Savings planner.</b> Works out how much of your salary to save each year to afford a flat.</span></li>
+            <li><span class="n">06</span><span><b>Model evaluation.</b> 5-fold cross-validation, residual plots and feature importance charts.</span></li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="approach">
+    <div class="wrap">
+      <div class="sec-head"><span class="addr">0x03 · Approach</span><h2>How I build</h2></div>
+      <ol class="steps">
+        <li><span class="k">STEP 1</span><h3>Plan</h3><p>Sketch the core loop or feature and what the user should be able to do.</p></li>
+        <li><span class="k">STEP 2</span><h3>Prototype</h3><p>Use AI tools to draft code quickly and get a first version running.</p></li>
+        <li><span class="k">STEP 3</span><h3>Test &amp; debug</h3><p>Playtest, find what breaks or feels off, and fix it.</p></li>
+        <li><span class="k">STEP 4</span><h3>Polish</h3><p>Tune the numbers, clean up the UI and add the next feature.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="contact">
+        <div>
+          <h2>Looking for an intern?</h2>
+          <p>I'm available for internships in software, data or game development. I'd be glad to talk.</p>
+        </div>
+        <ul class="links">
+          <li><span class="k">GitHub</span><a class="v" href="https://github.com/ID10-0820" style="color:inherit">github.com/ID10-0820</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">Lucas · Computer Engineering, Singapore Polytechnic · 2026</div>
+</footer>
+
+</body>
+</html>
